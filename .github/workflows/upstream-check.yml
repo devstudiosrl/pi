@@ -1,0 +1,68 @@
+# Notice, without anybody having to remember, that upstream has moved.
+#
+# This fork carries no patches today (see PATCHES.md): it exists so that the
+# day one is needed, the machinery is known to work. That only holds if it is
+# actually rebased when upstream releases — otherwise it is a fork nobody has
+# ever synced, which is the thing it was created to avoid.
+#
+# Runs once a week, opens an issue when npm serves a version this branch is not
+# on, and never changes code.
+name: upstream check
+
+on:
+  schedule:
+    - cron: "23 6 * * 1" # Monday morning, before anybody looks
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: printalo
+          fetch-depth: 0
+
+      - name: Compare the shipped version with npm
+        id: v
+        run: |
+          ours="$(node -p "require('./packages/coding-agent/package.json').version")"
+          theirs="$(npm view @earendil-works/pi-coding-agent version)"
+          echo "ours=$ours" >> "$GITHUB_OUTPUT"
+          echo "theirs=$theirs" >> "$GITHUB_OUTPUT"
+          if [ "$ours" = "$theirs" ]; then
+            echo "behind=no" >> "$GITHUB_OUTPUT"
+          else
+            echo "behind=yes" >> "$GITHUB_OUTPUT"
+          fi
+          echo "printalo is on $ours, npm serves $theirs"
+
+      - name: Open an issue when we are behind
+        if: steps.v.outputs.behind == 'yes'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OURS: ${{ steps.v.outputs.ours }}
+          THEIRS: ${{ steps.v.outputs.theirs }}
+        run: |
+          title="upstream $THEIRS is out (we are on $OURS)"
+          # One open issue at a time: a new one every Monday would train
+          # everybody to ignore them.
+          open="$(gh issue list --state open --search "$title in:title" --json number --jq '.[0].number' || true)"
+          if [ -n "$open" ]; then
+            echo "issue #$open already open"
+            exit 0
+          fi
+          {
+            echo "\`printalo\` is on **$OURS**; npm serves **$THEIRS**."
+            echo
+            echo "    ./scripts/sync-upstream.sh"
+            echo
+            echo "rebases onto the newest upstream tag, runs the checks and tags the result."
+            echo "This fork carries no patches yet, so the rebase should be a fast-forward:"
+            echo "if it is not, something landed here that PATCHES.md does not mention."
+          } > body.md
+          gh issue create --title "$title" --body-file body.md

@@ -1,3 +1,20 @@
+> ## This is the Printalo fork
+>
+> Upstream is [earendil-works/pi](https://github.com/earendil-works/pi), and
+> `main` here is a mirror of it — never touched. The **`printalo`** branch is
+> the upstream release tag Printalo runs on, **plus nothing**:
+> [PATCHES.md](PATCHES.md) is empty on purpose.
+>
+> The fork exists for the day a change cannot wait for an upstream release. A
+> fork created that day, in a hurry, is a fork nobody has ever rebased — so
+> this one is rebased whenever upstream releases (`./scripts/sync-upstream.sh`,
+> and a weekly workflow that opens an issue when we are behind), and the
+> machinery is known to work before anybody needs it.
+>
+> Printalo installs `@earendil-works/pi-coding-agent` from npm; the day a patch
+> lands here, one line in `ddra` changes. Why this fork exists is written in
+> `made/docs/workflow/PIANO-fork-pi.md` in `ddra`.
+
 <p align="center">
   <a href="https://pi.dev">
     <img alt="pi logo" src="https://pi.dev/logo-auto.svg" width="128">
