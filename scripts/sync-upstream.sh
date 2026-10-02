@@ -70,10 +70,15 @@ fi
 [ "$DRY" = 1 ] && { say "dry run: stopping before the checks"; exit 0; }
 
 if [ "$BUILD" = 1 ]; then
-  say "npm ci";   npm ci
+  # The order upstream's CI uses: install without lifecycle scripts, build the
+  # workspaces, then test. The packages import each other through dist/, so
+  # testing before the build fails by the hundred on "Failed to resolve entry
+  # for package @earendil-works/pi-ai" — which says nothing about the rebase.
+  say "npm ci";   npm ci --ignore-scripts
+  say "build";    npm run build
   say "test";     npm test
 else
-  say "--no-build: skipping npm ci and test"
+  say "--no-build: skipping npm ci, build and test"
 fi
 
 n=1
