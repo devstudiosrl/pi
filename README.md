@@ -13,7 +13,7 @@
 >
 > Printalo installs `@earendil-works/pi-coding-agent` from npm; the day a patch
 > lands here, one line in `ddra` changes. Why this fork exists is written in
-> `made/docs/workflow/PIANO-fork-pi.md` in `ddra`.
+> `made/docs/piani/eseguiti/PIANO-fork-pi.md` in `ddra`.
 
 <p align="center">
   <a href="https://pi.dev">
